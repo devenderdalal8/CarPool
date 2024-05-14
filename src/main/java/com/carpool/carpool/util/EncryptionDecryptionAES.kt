@@ -28,8 +28,8 @@ object EncryptionDecryptionAES {
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    fun encrypt(password: String): String {
-        val passwordByte = password.toByteArray()
+    fun String.encrypt( ): String {
+        val passwordByte = this.toByteArray()
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
         val encryptedByte = cipher.doFinal(passwordByte)
         val encoder = Base64.encode(encryptedByte)

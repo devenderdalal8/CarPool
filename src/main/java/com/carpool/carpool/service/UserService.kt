@@ -1,121 +1,122 @@
-package com.carpool.carpool.service;
+package com.carpool.carpool.service
 
-import com.carpool.carpool.dao.UserDao;
-import com.carpool.carpool.dto.User;
-import com.carpool.carpool.entity.login.LoginUserRequest;
-import com.carpool.carpool.entity.register.RegisterUserRequest;
-import com.carpool.carpool.util.ResponseStructure;
-import com.carpool.carpool.util.EncryptionDecryptionAES;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-import java.util.UUID;
+import com.carpool.carpool.dao.UserDao
+import com.carpool.carpool.dto.User
+import com.carpool.carpool.entity.login.LoginUserRequest
+import com.carpool.carpool.entity.register.RegisterUserRequest
+import com.carpool.carpool.util.EncryptionDecryptionAES.decrypt
+import com.carpool.carpool.util.EncryptionDecryptionAES.encrypt
+import com.carpool.carpool.util.ResponseStructure
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
-public class UserService {
+open class UserService {
     @Autowired
-    private UserDao userDao;
+    private val userDao: UserDao? = null
 
-    private final String CONFIRM_ACCOUNT = "confirm-account";
-    private final String RESET_PASSWORD = "reset-password";
-
-    public ResponseStructure<User> signup(RegisterUserRequest request) {
-        ResponseStructure<User> responseStructure = new ResponseStructure<>();
-        String password = EncryptionDecryptionAES.INSTANCE.encrypt(request.getPassword());
-        User user = new User(request.getFullName(), request.getEmail(), password);
-        User response = userDao.saveUser(user);
-        userDao.sendMail(user.getEmail(), "Account Confirmation!", CONFIRM_ACCOUNT, user.getToken());
-        if (response != null) {
-            responseStructure.setData(response);
-            responseStructure.setStatusCode(HttpStatus.CREATED.value());
-            responseStructure.setMessage("Verify email by the link sent on your email address");
-        } else {
-            responseStructure.setData(null);
-            responseStructure.setStatusCode(HttpStatus.CREATED.value());
-            responseStructure.setMessage("User has failed to save");
-        }
-        return responseStructure;
+    companion object {
+        private const val CONFIRM_ACCOUNT = "confirm-account"
+        private val RESET_PASSWORD = "reset-password"
     }
 
-    public ResponseStructure<User> login(LoginUserRequest userRequest) {
-        ResponseStructure<User> responseStructure = new ResponseStructure<>();
-        User user = userDao.getUserByEmail(userRequest.getEmail()).orElse(null);
+    fun signup(request: RegisterUserRequest): ResponseStructure<User?> {
+        val responseStructure = ResponseStructure<User?>()
+        val password = request.password.encrypt()
+        val user = User(request.fullName, request.email, password)
+        val response = userDao!!.saveUser(user)
+        userDao.sendMail(user.email, "Account Confirmation!", CONFIRM_ACCOUNT, user.token)
+        if (response != null) {
+            responseStructure.data = response
+            responseStructure.statusCode = HttpStatus.CREATED.value()
+            responseStructure.message = "Verify email by the link sent on your email address"
+        } else {
+            responseStructure.data = null
+            responseStructure.statusCode = HttpStatus.CREATED.value()
+            responseStructure.message = "User has failed to save"
+        }
+        return responseStructure
+    }
+
+    fun login(userRequest: LoginUserRequest): ResponseStructure<User?> {
+        val responseStructure = ResponseStructure<User?>()
+        val user = userDao!!.getUserByEmail(userRequest.email).orElse(null)
         if (user != null) {
-            String password = EncryptionDecryptionAES.INSTANCE.decrypt(user.getPassword());
-            if (password.equals(userRequest.getPassword())) {
-                responseStructure.setData(user);
-                responseStructure.setStatusCode(HttpStatus.OK.value());
-                responseStructure.setMessage("User logged in successfully");
+            val password = decrypt(user.password)
+            if (password == userRequest.password) {
+                responseStructure.data = user
+                responseStructure.statusCode = HttpStatus.OK.value()
+                responseStructure.message = "User logged in successfully"
             }
         } else {
-            responseStructure.setData(null);
-            responseStructure.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-            responseStructure.setMessage("User has failed to login");
+            responseStructure.data = null
+            responseStructure.statusCode = HttpStatus.UNAUTHORIZED.value()
+            responseStructure.message = "User has failed to login"
         }
-        return responseStructure;
+        return responseStructure
     }
 
-    public ResponseStructure<User> confirmAccount(String token) {
-        ResponseStructure<User> responseStructure = new ResponseStructure<>();
-        Optional<User> userToken = userDao.getToken(token);
-        if (userToken.isEmpty()) {
-            responseStructure.setData(null);
-            responseStructure.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseStructure.setMessage("User not found");
+    fun confirmAccount(token: String?): ResponseStructure<User?> {
+        val responseStructure = ResponseStructure<User?>()
+        val userToken = userDao!!.getToken(token)
+        if (userToken.isEmpty) {
+            responseStructure.data = null
+            responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
+            responseStructure.message = "User not found"
         }
-        if (userToken.isPresent()) {
-            User user = userToken.get();
-            user.setToken(UUID.randomUUID().toString());
-            user.setEnabled(true);
-            userDao.saveUser(user);
-            responseStructure.setData(user);
-            responseStructure.setStatusCode(HttpStatus.CREATED.value());
-            responseStructure.setMessage("User has successfully confirm account");
+        if (userToken.isPresent) {
+            val user = userToken.get()
+            user.token = UUID.randomUUID().toString()
+            user.enabled = true
+            userDao.saveUser(user)
+            responseStructure.data = user
+            responseStructure.statusCode = HttpStatus.CREATED.value()
+            responseStructure.message = "User has successfully confirm account"
         }
 
-        return responseStructure;
+        return responseStructure
     }
 
-    public ResponseStructure<User> forgotPass(String email) {
-        ResponseStructure<User> responseStructure = new ResponseStructure<>();
-        Optional<User> user = userDao.getUserByEmail(email);
-        if (user.isEmpty()) {
-            responseStructure.setData(null);
-            responseStructure.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseStructure.setMessage("User not found");
+    fun forgotPass(email: String?): ResponseStructure<User?> {
+        val responseStructure = ResponseStructure<User?>()
+        val user = userDao!!.getUserByEmail(email)
+        if (user.isEmpty) {
+            responseStructure.data = null
+            responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
+            responseStructure.message = "User not found"
         }
-        if (user.isPresent()) {
-            User userData = user.get();
-            userData.setToken(UUID.randomUUID().toString());
-            userData.setUpdatedAt();
-//            userDao.sendMail(userData.getEmail(), "Reset Password!", RESET_PASSWORD, userData.getToken());
-            userDao.saveUser(userData);
-            responseStructure.setData(userData);
-            responseStructure.setStatusCode(HttpStatus.OK.value());
-            responseStructure.setMessage("Verify email by the link sent on your email address");
+        if (user.isPresent) {
+            val userData = user.get()
+            userData.token = UUID.randomUUID().toString()
+            userData.setUpdatedAt()
+            //            userDao.sendMail(userData.getEmail(), "Reset Password!", RESET_PASSWORD, userData.getToken());
+            userDao.saveUser(userData)
+            responseStructure.data = userData
+            responseStructure.statusCode = HttpStatus.OK.value()
+            responseStructure.message = "Verify email by the link sent on your email address"
         }
-        return responseStructure;
+        return responseStructure
     }
 
-    public ResponseStructure<User> resetPassword(String token, String password) {
-        ResponseStructure<User> responseStructure = new ResponseStructure<>();
-        Optional<User> userOptional = userDao.getToken(token);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            String encryptedPassword = EncryptionDecryptionAES.INSTANCE.encrypt(password);
-            user.setPassword(encryptedPassword);
-            user.setToken(token);
-            userDao.saveUser(user);
-            responseStructure.setData(user);
-            responseStructure.setStatusCode(HttpStatus.OK.value());
-            responseStructure.setMessage("Verify email by the link sent on your email address");
+    fun resetPassword(token: String?, password: String?): ResponseStructure<User?> {
+        val responseStructure = ResponseStructure<User?>()
+        val userOptional = userDao!!.getToken(token)
+        if (userOptional.isPresent) {
+            val user = userOptional.get()
+            val encryptedPassword = password?.encrypt()
+            user.password = encryptedPassword
+            user.token = token
+            userDao.saveUser(user)
+            responseStructure.data = user
+            responseStructure.statusCode = HttpStatus.OK.value()
+            responseStructure.message = "Verify email by the link sent on your email address"
         } else {
-            responseStructure.setData(null);
-            responseStructure.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseStructure.setMessage("User not found");
+            responseStructure.data = null
+            responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
+            responseStructure.message = "User not found"
         }
-        return responseStructure;
+        return responseStructure
     }
 }
