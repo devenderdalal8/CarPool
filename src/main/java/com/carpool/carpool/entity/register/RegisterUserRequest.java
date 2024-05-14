@@ -1,6 +1,5 @@
 package com.carpool.carpool.entity.register;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 public class RegisterUserRequest {
@@ -29,16 +28,8 @@ public class RegisterUserRequest {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getFullName() {
         return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     @Override

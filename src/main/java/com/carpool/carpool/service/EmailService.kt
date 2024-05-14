@@ -1,7 +1,5 @@
 package com.carpool.carpool.service
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.scheduling.annotation.Async
@@ -11,15 +9,7 @@ import org.thymeleaf.TemplateEngine
 
 @Service("emailService")
 @Transactional
-open class EmailService (private var mailSender: JavaMailSender, templateEngine: TemplateEngine) {
-   /* private var mailSender: JavaMailSender? = null
-     private var templateEngine: TemplateEngine? = null
-
-    @Autowired
-    constructor(mailSender: JavaMailSender, templateEngine: TemplateEngine) : this() {
-        this.mailSender = mailSender
-        this.templateEngine = templateEngine
-    }*/
+open class EmailService (private var mailSender: JavaMailSender, val templateEngine: TemplateEngine) {
 
     @Async
     open fun sendEmail(email: SimpleMailMessage) {

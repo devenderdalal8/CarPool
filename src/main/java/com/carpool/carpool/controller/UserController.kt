@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.logging.Logger
 
 /**
  * This class handles user-related operations such as registration, login, password reset, and account confirmation.
@@ -33,7 +32,6 @@ class UserController {
      */
     @PostMapping("/signup")
     fun saveUser(@RequestBody userRequest: RegisterUserRequest): ResponseStructure<User?> {
-        logger.debug("{userRequest}", userRequest)
         return userService.signup(userRequest)
     }
 
