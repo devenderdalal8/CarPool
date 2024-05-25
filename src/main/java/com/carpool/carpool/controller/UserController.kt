@@ -7,6 +7,7 @@ import com.carpool.carpool.service.UserService
 import com.carpool.carpool.util.ResponseStructure
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,7 +32,7 @@ class UserController {
      * @return A ResponseStructure object containing the saved User object.
      */
     @PostMapping("/signup")
-    fun saveUser(@RequestBody userRequest: RegisterUserRequest): ResponseStructure<User?> {
+    fun saveUser(@RequestBody userRequest: RegisterUserRequest): ResponseStructure<User> {
         return userService.signup(userRequest)
     }
 
@@ -67,7 +68,7 @@ class UserController {
      * @param email The email address of the user who wants to reset their password.
      * @return A ResponseStructure object containing the User object with a reset token.
      */
-    @PostMapping("/forgot-password")
+    @PostMapping("/forgotPassword")
     fun forgotPass(@RequestParam("email") email: String): ResponseStructure<User?> {
         return userService.forgotPass(email)
     }
@@ -82,8 +83,13 @@ class UserController {
      * @param password The new password for the user.
      * @return A ResponseStructure object containing the updated User object.
      */
-    @RequestMapping(value = ["/reset-password"], method = [RequestMethod.GET, RequestMethod.POST])
+    @RequestMapping(value = ["/resetPassword"], method = [RequestMethod.GET, RequestMethod.POST])
     fun resetPass(@RequestParam(value = "token") token: String, @RequestParam(value = "password") password: String): ResponseStructure<User?> {
         return userService.resetPassword(token, password)
+    }
+
+    @GetMapping("/test")
+    fun test():String{
+        return "test"
     }
 }

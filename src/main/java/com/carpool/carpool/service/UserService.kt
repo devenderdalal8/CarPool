@@ -15,34 +15,42 @@ import java.util.*
 @Service
 open class UserService {
     @Autowired
-    private val userDao: UserDao? = null
+    private lateinit var userDao: UserDao
 
     companion object {
         private const val CONFIRM_ACCOUNT = "confirm-account"
         private val RESET_PASSWORD = "reset-password"
     }
 
-    fun signup(request: RegisterUserRequest): ResponseStructure<User?> {
-        val responseStructure = ResponseStructure<User?>()
+    fun signup(request: RegisterUserRequest): ResponseStructure<User> {
+        val responseStructure = ResponseStructure<User>()
         val password = request.password.encrypt()
         val user = User(request.fullName, request.email, password)
-        val response = userDao!!.saveUser(user)
-        userDao.sendMail(user.email, "Account Confirmation!", CONFIRM_ACCOUNT, user.token)
-        if (response != null) {
-            responseStructure.data = response
-            responseStructure.statusCode = HttpStatus.CREATED.value()
-            responseStructure.message = "Verify email by the link sent on your email address"
-        } else {
+        try {
+            val response = userDao.saveUser(user)
+            userDao.sendMail(user.email, "Account Confirmation!", CONFIRM_ACCOUNT, user.token)
+            responseStructure.apply {
+                if (response != null) {
+                    data = response
+                    statusCode = HttpStatus.CREATED.value()
+                    message = "Verify email by the link sent on your email address"
+                } else {
+                    data = null
+                    statusCode = HttpStatus.CREATED.value()
+                    message = "User has failed to save"
+                }
+            }
+        } catch (ex: Exception) {
             responseStructure.data = null
-            responseStructure.statusCode = HttpStatus.CREATED.value()
-            responseStructure.message = "User has failed to save"
+            responseStructure.statusCode = HttpStatus.FOUND.value()
+            responseStructure.message = "User Found"
         }
         return responseStructure
     }
 
     fun login(userRequest: LoginUserRequest): ResponseStructure<User?> {
         val responseStructure = ResponseStructure<User?>()
-        val user = userDao!!.getUserByEmail(userRequest.email).orElse(null)
+        val user = userDao.getUserByEmail(userRequest.email).orElse(null)
         if (user != null) {
             val password = decrypt(user.password)
             if (password == userRequest.password) {
@@ -60,7 +68,7 @@ open class UserService {
 
     fun confirmAccount(token: String?): ResponseStructure<User?> {
         val responseStructure = ResponseStructure<User?>()
-        val userToken = userDao!!.getToken(token)
+        val userToken = userDao.getToken(token)
         if (userToken.isEmpty) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
@@ -81,7 +89,7 @@ open class UserService {
 
     fun forgotPass(email: String?): ResponseStructure<User?> {
         val responseStructure = ResponseStructure<User?>()
-        val user = userDao!!.getUserByEmail(email)
+        val user = userDao.getUserByEmail(email)
         if (user.isEmpty) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
@@ -102,7 +110,7 @@ open class UserService {
 
     fun resetPassword(token: String?, password: String?): ResponseStructure<User?> {
         val responseStructure = ResponseStructure<User?>()
-        val userOptional = userDao!!.getToken(token)
+        val userOptional = userDao.getToken(token)
         if (userOptional.isPresent) {
             val user = userOptional.get()
             val encryptedPassword = password?.encrypt()

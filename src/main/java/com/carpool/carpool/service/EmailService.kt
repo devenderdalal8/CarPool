@@ -1,5 +1,6 @@
 package com.carpool.carpool.service
 
+import org.springframework.context.annotation.Lazy
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.scheduling.annotation.Async
@@ -20,6 +21,8 @@ open class EmailService (private var mailSender: JavaMailSender, val templateEng
         }
     }
 
+    @Async
+    @Lazy
     fun sendEmailWithoutHtml(email: String?, subject: String?, endpoint: String, token: String) {
         val mailMessage = SimpleMailMessage()
         mailMessage.setTo(email)
