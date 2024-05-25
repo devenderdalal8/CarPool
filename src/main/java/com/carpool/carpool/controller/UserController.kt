@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 /**
  * This class handles user-related operations such as registration, login, password reset, and account confirmation.
  */
-@RestController
+@RestController("/user")
 class UserController {
     @Autowired
     lateinit var userService: UserService

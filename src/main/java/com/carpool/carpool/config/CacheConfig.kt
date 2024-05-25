@@ -13,10 +13,10 @@ import java.time.Duration
 
 @Configuration
 @EnableCaching
-class CacheConfig {
+open class CacheConfig {
 
     @Bean
-    fun cacheManager(redisConnectionFactory: RedisConnectionFactory?): RedisCacheManager? {
+    public open fun cacheManager(redisConnectionFactory: RedisConnectionFactory?): RedisCacheManager? {
         val cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofMinutes(5))
             .disableCachingNullValues()
