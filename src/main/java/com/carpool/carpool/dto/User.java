@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -38,6 +40,8 @@ public class User {
 
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<UserRole> roles = new HashSet<>();
 
     public User() {
     }
@@ -105,6 +109,15 @@ public class User {
     public void setUpdatedAt() {
         this.updatedAt = new Date();
     }
+
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = roles;
+    }
+
 
     public Boolean getEnabled() {
         return isEnabled;
