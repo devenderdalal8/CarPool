@@ -5,7 +5,6 @@ import com.carpool.carpool.dto.AuthResponse
 import com.carpool.carpool.dto.User
 import com.carpool.carpool.entity.login.LoginUserRequest
 import com.carpool.carpool.entity.register.RegisterUserRequest
-import com.carpool.carpool.util.EncryptionDecryptionAES.encrypt
 import com.carpool.carpool.util.EncryptionDecryptionAES.hashPassword
 import com.carpool.carpool.util.EncryptionDecryptionAES.matches
 import com.carpool.carpool.util.JwtUtils
@@ -54,7 +53,7 @@ open class UserService {
                     message = "User has failed to save"
                 }
             }
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.FOUND.value()
             responseStructure.message = "User Found"
@@ -65,19 +64,19 @@ open class UserService {
     fun login(userRequest: LoginUserRequest): ResponseStructure<AuthResponse?> {
         val responseStructure = ResponseStructure<AuthResponse?>()
         val user = userDao.getUserByEmail(userRequest.email).orElse(null)
-        if (user != null) {
-            if (matches(userRequest.password, user.password.toString())) {
-                val accessToken = jwtUtil.generateAccessToken(user.email)
-                val refreshToken = jwtUtil.generateRefreshToken(user.email)
-                responseStructure.data = AuthResponse(accessToken, refreshToken)
-                responseStructure.statusCode = HttpStatus.OK.value()
-                responseStructure.message = "User logged in successfully"
-            }
-        } else {
+        val isTokenMatch = matches(userRequest.password, user.password.toString());
+        if (user == null || !isTokenMatch) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.UNAUTHORIZED.value()
-            responseStructure.message = "User has failed to login"
+            responseStructure.message = if (isTokenMatch) "Invalid credentials" else "User has failed to login"
+            return responseStructure
         }
+        val accessToken = jwtUtil.generateAccessToken(user.email)
+        val refreshToken = jwtUtil.generateRefreshToken(user.email)
+        responseStructure.data = AuthResponse(accessToken, refreshToken)
+        responseStructure.statusCode = HttpStatus.OK.value()
+        responseStructure.message = "User logged in successfully"
+
         return responseStructure
     }
 
@@ -114,7 +113,7 @@ open class UserService {
             val userData = user.get()
             userData.token = UUID.randomUUID().toString()
             userData.setUpdatedAt()
-            //            userDao.sendMail(userData.getEmail(), "Reset Password!", RESET_PASSWORD, userData.getToken());
+            userDao.sendMail(userData.email, "Reset Password!", RESET_PASSWORD, userData.token);
             userDao.saveUser(userData)
             responseStructure.data = userData
             responseStructure.statusCode = HttpStatus.OK.value()
@@ -128,13 +127,13 @@ open class UserService {
         val userOptional = userDao.getToken(token)
         if (userOptional.isPresent) {
             val user = userOptional.get()
-            val encryptedPassword = password?.encrypt()
+            val encryptedPassword = password?.hashPassword()
             user.password = encryptedPassword
-            user.token = token
+            user.token = null
             userDao.saveUser(user)
             responseStructure.data = user
             responseStructure.statusCode = HttpStatus.OK.value()
-            responseStructure.message = "Verify email by the link sent on your email address"
+            responseStructure.message = "Password reset successful, please login again"
         } else {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.NOT_FOUND.value()

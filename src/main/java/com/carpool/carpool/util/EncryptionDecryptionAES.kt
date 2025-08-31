@@ -13,43 +13,10 @@ object EncryptionDecryptionAES {
     private lateinit var secretKey: SecretKey
     val encoder = BCryptPasswordEncoder()
 
-    init {
-        initialize()
-    }
-
-    private fun initialize() {
-        cipher = Cipher.getInstance("AES")
-        secretKey = KEY_LENGTH.generateKey()
-    }
-
-    private fun Int.generateKey(): SecretKey {
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(this)
-        val key = keyGenerator.generateKey()
-        return key
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    fun String.encrypt(): String {
-        val passwordByte = this.toByteArray()
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val encryptedByte = cipher.doFinal(passwordByte)
-        val encoder = Base64.encode(encryptedByte)
-        return encoder
-    }
-
     fun String.hashPassword(): String = encoder.encode(this)
 
     fun matches(rawPassword: String, hashed: String): Boolean {
         return encoder.matches(rawPassword, hashed)
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
-    fun decrypt(password: String): String {
-        val decoder = Base64.decode(password)
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        val decryptedByte = cipher.doFinal(decoder)
-        val decryptedText = String(decryptedByte)
-        return decryptedText
-    }
 }
