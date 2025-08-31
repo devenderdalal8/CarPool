@@ -1,13 +1,17 @@
 package com.carpool.carpool.service
 
 import com.carpool.carpool.dao.UserDao
+import com.carpool.carpool.dto.AuthResponse
 import com.carpool.carpool.dto.User
 import com.carpool.carpool.entity.login.LoginUserRequest
 import com.carpool.carpool.entity.register.RegisterUserRequest
-import com.carpool.carpool.util.EncryptionDecryptionAES.decrypt
 import com.carpool.carpool.util.EncryptionDecryptionAES.encrypt
+import com.carpool.carpool.util.EncryptionDecryptionAES.hashPassword
+import com.carpool.carpool.util.EncryptionDecryptionAES.matches
+import com.carpool.carpool.util.JwtUtils
 import com.carpool.carpool.util.ResponseStructure
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.*
@@ -17,6 +21,16 @@ open class UserService {
     @Autowired
     private lateinit var userDao: UserDao
 
+    @Autowired
+    private lateinit var jwtUtil: JwtUtils
+
+    @Value("\${security.jwt.expiration-time}")
+    private val ACCESS_EXPIRATION: Long = 0
+
+    @Value("\${security.jwt.refresh-time}")
+    private val REFRESH_EXPIRATION: Long = 0
+
+
     companion object {
         private const val CONFIRM_ACCOUNT = "confirm-account"
         private val RESET_PASSWORD = "reset-password"
@@ -24,7 +38,7 @@ open class UserService {
 
     fun signup(request: RegisterUserRequest): ResponseStructure<User> {
         val responseStructure = ResponseStructure<User>()
-        val password = request.password.encrypt()
+        val password = request.password?.hashPassword()
         val user = User(request.fullName, request.email, password)
         try {
             val response = userDao.saveUser(user)
@@ -48,13 +62,14 @@ open class UserService {
         return responseStructure
     }
 
-    fun login(userRequest: LoginUserRequest): ResponseStructure<User?> {
-        val responseStructure = ResponseStructure<User?>()
+    fun login(userRequest: LoginUserRequest): ResponseStructure<AuthResponse?> {
+        val responseStructure = ResponseStructure<AuthResponse?>()
         val user = userDao.getUserByEmail(userRequest.email).orElse(null)
         if (user != null) {
-            val password = decrypt(user.password)
-            if (password == userRequest.password) {
-                responseStructure.data = user
+            if (matches(userRequest.password, user.password.toString())) {
+                val accessToken = jwtUtil.generateAccessToken(user.email)
+                val refreshToken = jwtUtil.generateRefreshToken(user.email)
+                responseStructure.data = AuthResponse(accessToken, refreshToken)
                 responseStructure.statusCode = HttpStatus.OK.value()
                 responseStructure.message = "User logged in successfully"
             }

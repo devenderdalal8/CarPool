@@ -1,5 +1,6 @@
 package com.carpool.carpool.controller
 
+import com.carpool.carpool.dto.AuthResponse
 import com.carpool.carpool.dto.User
 import com.carpool.carpool.entity.login.LoginUserRequest
 import com.carpool.carpool.entity.register.RegisterUserRequest
@@ -24,6 +25,7 @@ class UserController {
     lateinit var userService: UserService
     var logger = LoggerFactory.getLogger(UserController::class.java)
 
+
     /**
      * This method is used to save a new user in the system. It takes a RegisterUserRequest object as input, which contains the user's registration details.
      * The method then calls the corresponding method in the UserService to save the user in the database.
@@ -36,6 +38,11 @@ class UserController {
         return userService.signup(userRequest)
     }
 
+    @GetMapping("/")
+    fun indexOf(): String {
+        return "Api is Working"
+    }
+
     /**
      * This method is used to authenticate a user and return their details. It takes a LoginUserRequest object as input, which contains the user's login credentials.
      * The method then calls the corresponding method in the UserService to authenticate the user and return their details.
@@ -44,7 +51,7 @@ class UserController {
      * @return A ResponseStructure object containing the authenticated User object.
      */
     @PostMapping("/login")
-    fun login(@RequestBody userRequest: LoginUserRequest): ResponseStructure<User?> {
+    fun login(@RequestBody userRequest: LoginUserRequest): ResponseStructure<AuthResponse?> {
         return userService.login(userRequest)
     }
 
@@ -84,12 +91,15 @@ class UserController {
      * @return A ResponseStructure object containing the updated User object.
      */
     @RequestMapping(value = ["/resetPassword"], method = [RequestMethod.GET, RequestMethod.POST])
-    fun resetPass(@RequestParam(value = "token") token: String, @RequestParam(value = "password") password: String): ResponseStructure<User?> {
+    fun resetPass(
+        @RequestParam(value = "token") token: String,
+        @RequestParam(value = "password") password: String
+    ): ResponseStructure<User?> {
         return userService.resetPassword(token, password)
     }
 
     @GetMapping("/test")
-    fun test():String{
+    fun test(): String {
         return "test"
     }
 }
