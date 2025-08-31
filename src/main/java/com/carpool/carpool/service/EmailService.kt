@@ -28,7 +28,7 @@ open class EmailService (private var mailSender: JavaMailSender, val templateEng
         mailMessage.setTo(email)
         mailMessage.subject = subject
         mailMessage.text = ("To confirm your account, please click here : "
-                + "http://localhost:1234/" + endpoint + "?token=" + token)
+                + "http://localhost:1235/" + endpoint + "?token=" + token)
         sendEmail(mailMessage)
     }
 }

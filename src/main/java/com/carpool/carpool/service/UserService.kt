@@ -149,7 +149,9 @@ open class UserService {
         val token = request.refreshToken
         val userName = jwtUtil.extractUserName(token)
         val tokenRequest = userDao.getRefreshTokenByUserName(userName)
-        val isValidToken = (token == tokenRequest.refreshToken) && !jwtUtil.isTokenExpired(token)
+        val isValidToken = (token == tokenRequest.refreshToken)
+                && !jwtUtil.isTokenExpired(token)
+                && !jwtUtil.isTokenExpired(tokenRequest.refreshToken)
         val responseStructure = ResponseStructure<RefreshTokenResponse>()
         return if (isValidToken) {
             val userName = jwtUtil.extractUserName(token)
