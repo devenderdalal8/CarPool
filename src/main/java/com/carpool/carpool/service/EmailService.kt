@@ -23,7 +23,7 @@ open class EmailService (private var mailSender: JavaMailSender, val templateEng
 
     @Async
     @Lazy
-    fun sendEmailWithoutHtml(email: String?, subject: String?, endpoint: String, token: String) {
+    fun sendEmailWithoutHtml(email: String?, subject: String?, endpoint: String, token: String?) {
         val mailMessage = SimpleMailMessage()
         mailMessage.setTo(email)
         mailMessage.subject = subject

@@ -3,11 +3,14 @@ package com.carpool.carpool.controller
 import com.carpool.carpool.dto.AuthResponse
 import com.carpool.carpool.dto.User
 import com.carpool.carpool.entity.login.LoginUserRequest
+import com.carpool.carpool.entity.refreshToken.RefreshTokenRequest
+import com.carpool.carpool.entity.refreshToken.RefreshTokenResponse
 import com.carpool.carpool.entity.register.RegisterUserRequest
 import com.carpool.carpool.service.UserService
 import com.carpool.carpool.util.ResponseStructure
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -58,5 +61,12 @@ class UserController {
         @RequestParam(value = "password") password: String
     ): ResponseStructure<User?> {
         return userService.resetPassword(token, password)
+    }
+
+    @PostMapping("/refresh-token")
+    fun refreshToken(@RequestBody request: RefreshTokenRequest): ResponseEntity<ResponseStructure<RefreshTokenResponse>> {
+        val response = userService.refreshToken(request)
+        logger.info("api called ${response.data} => ${response.statusCode}")
+        return ResponseEntity.status(response.statusCode).body(response)
     }
 }

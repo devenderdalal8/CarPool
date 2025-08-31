@@ -24,12 +24,13 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/user/**",
                                 "/api/user/login",
                                 "/api/user/signup",
                                 "/api/user/confirm-account",
                                 "/api/user/forgot-password",
-                                "/api/user/reset-password"
+                                "/api/user/reset-password",
+                                "/api/user/refresh-token"
                         ).permitAll()   // ✅ allow public endpoints
                         .anyRequest().authenticated() // ✅ secure all others
                 )

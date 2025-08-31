@@ -4,6 +4,8 @@ import com.carpool.carpool.dao.UserDao
 import com.carpool.carpool.dto.AuthResponse
 import com.carpool.carpool.dto.User
 import com.carpool.carpool.entity.login.LoginUserRequest
+import com.carpool.carpool.entity.refreshToken.RefreshTokenRequest
+import com.carpool.carpool.entity.refreshToken.RefreshTokenResponse
 import com.carpool.carpool.entity.register.RegisterUserRequest
 import com.carpool.carpool.util.EncryptionDecryptionAES.hashPassword
 import com.carpool.carpool.util.EncryptionDecryptionAES.matches
@@ -63,8 +65,8 @@ open class UserService {
 
     fun login(userRequest: LoginUserRequest): ResponseStructure<AuthResponse?> {
         val responseStructure = ResponseStructure<AuthResponse?>()
-        val user = userDao.getUserByEmail(userRequest.email).orElse(null)
-        val isTokenMatch = matches(userRequest.password, user.password.toString());
+        val user = userDao.getUserByEmail(userRequest.email)?.orElse(null)
+        val isTokenMatch = matches(userRequest.password, user?.password.toString());
         if (user == null || !isTokenMatch) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.UNAUTHORIZED.value()
@@ -73,6 +75,7 @@ open class UserService {
         }
         val accessToken = jwtUtil.generateAccessToken(user.email)
         val refreshToken = jwtUtil.generateRefreshToken(user.email)
+        userDao.saveToken(user.email, accessToken, refreshToken)
         responseStructure.data = AuthResponse(accessToken, refreshToken)
         responseStructure.statusCode = HttpStatus.OK.value()
         responseStructure.message = "User logged in successfully"
@@ -104,12 +107,12 @@ open class UserService {
     fun forgotPass(email: String?): ResponseStructure<User?> {
         val responseStructure = ResponseStructure<User?>()
         val user = userDao.getUserByEmail(email)
-        if (user.isEmpty) {
+        if (user?.isEmpty == true) {
             responseStructure.data = null
             responseStructure.statusCode = HttpStatus.NOT_FOUND.value()
             responseStructure.message = "User not found"
         }
-        if (user.isPresent) {
+        if (user?.isPresent == true) {
             val userData = user.get()
             userData.token = UUID.randomUUID().toString()
             userData.setUpdatedAt()
@@ -140,5 +143,28 @@ open class UserService {
             responseStructure.message = "User not found"
         }
         return responseStructure
+    }
+
+    fun refreshToken(request: RefreshTokenRequest): ResponseStructure<RefreshTokenResponse> {
+        val token = request.refreshToken
+        val userName = jwtUtil.extractUserName(token)
+        val tokenRequest = userDao.getRefreshTokenByUserName(userName)
+        val isValidToken = (token == tokenRequest.refreshToken) && !jwtUtil.isTokenExpired(token)
+        val responseStructure = ResponseStructure<RefreshTokenResponse>()
+        return if (isValidToken) {
+            val userName = jwtUtil.extractUserName(token)
+            val newAccessToken = jwtUtil.generateAccessToken(userName)
+            val newRefreshToken = jwtUtil.generateRefreshToken(userName)
+            userDao.saveToken(userName, newAccessToken, newRefreshToken)
+            responseStructure.statusCode = 200
+            responseStructure.message = "Generated new access token"
+            responseStructure.data = RefreshTokenResponse(newAccessToken, newRefreshToken)
+            responseStructure
+        } else {
+            responseStructure.message = "Invalid or expired refresh token"
+            responseStructure.data = null
+            responseStructure.statusCode = 403
+            responseStructure
+        }
     }
 }
