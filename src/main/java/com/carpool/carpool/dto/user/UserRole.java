@@ -1,4 +1,4 @@
-package com.carpool.carpool.dto;
+package com.carpool.carpool.dto.user;
 
 import jakarta.persistence.*;
 import lombok.*;

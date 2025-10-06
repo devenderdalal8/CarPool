@@ -6,10 +6,12 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import java.util.concurrent.Executor
 
 @EnableAsync
 @SpringBootApplication(exclude = [SecurityAutoConfiguration::class])
+@EnableWebSocketMessageBroker
 open class CarPoolApplication {
     @Bean
     open fun taskExecutor(): Executor {

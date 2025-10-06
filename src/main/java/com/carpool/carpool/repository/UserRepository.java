@@ -1,6 +1,6 @@
 package com.carpool.carpool.repository;
 
-import com.carpool.carpool.dto.User;
+import com.carpool.carpool.dto.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

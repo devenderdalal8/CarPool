@@ -1,11 +1,10 @@
 package com.carpool.carpool.dao;
 
-import com.carpool.carpool.dto.User;
+import com.carpool.carpool.dto.user.User;
 import com.carpool.carpool.dto.refreshToken.RefreshToken;
 import com.carpool.carpool.repository.RefreshTokenRepository;
 import com.carpool.carpool.repository.UserRepository;
 import com.carpool.carpool.service.EmailService;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;

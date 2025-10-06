@@ -1,7 +1,7 @@
 package com.carpool.carpool.controller
 
-import com.carpool.carpool.dto.AuthResponse
-import com.carpool.carpool.dto.User
+import com.carpool.carpool.dto.user.AuthResponse
+import com.carpool.carpool.dto.user.User
 import com.carpool.carpool.entity.login.LoginUserRequest
 import com.carpool.carpool.entity.refreshToken.RefreshTokenRequest
 import com.carpool.carpool.entity.refreshToken.RefreshTokenResponse
