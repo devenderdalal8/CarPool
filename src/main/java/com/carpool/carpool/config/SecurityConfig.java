@@ -30,7 +30,10 @@ public class SecurityConfig {
                                 "/api/user/confirm-account",
                                 "/api/user/forgot-password",
                                 "/api/user/reset-password",
-                                "/api/user/refresh-token"
+                                "/api/user/refresh-token",
+                                "/ws/**",
+                                "/ws",
+                                "/home.html"
                         ).permitAll()   // ✅ allow public endpoints
                         .anyRequest().authenticated() // ✅ secure all others
                 )

@@ -31,18 +31,23 @@ class UserController {
 
     @GetMapping("/")
     fun indexOf(): String {
-        return "Api is Working"
+        return "home"
     }
 
     @PostMapping("/signup")
     fun signup(@RequestBody userRequest: RegisterUserRequest): ResponseStructure<User> {
         logger.info("Signup API hit with email: ${userRequest.email}")
-        return userService.signup(userRequest)
+        val signup = userService.signup(userRequest)
+        logger.info("Signup process completed with status code: ${signup.statusCode} => ${signup.message}")
+        return signup
     }
 
     @PostMapping("/login")
     fun login(@RequestBody userRequest: LoginUserRequest): ResponseStructure<AuthResponse?> {
-        return userService.login(userRequest)
+        logger.info("Login API hit with email: ${userRequest.email}")
+        val login = userService.login(userRequest)
+        logger.info("Login process completed with status code: ${login.statusCode} => ${login.message}")
+        return login
     }
 
     @RequestMapping(value = ["/confirm-account"], method = [RequestMethod.GET, RequestMethod.POST])

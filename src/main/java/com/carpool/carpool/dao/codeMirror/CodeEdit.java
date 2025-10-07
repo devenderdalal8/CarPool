@@ -16,4 +16,17 @@ public class CodeEdit {
     private int endIndex;
     private String newText;
     private String fullCode;
+
+    @Override
+    public String toString() {
+        return "CodeEdit{" +
+                "sessionId='" + sessionId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", lineNumber=" + lineNumber +
+                ", startIndex=" + startIndex +
+                ", endIndex=" + endIndex +
+                ", newText='" + newText + '\'' +
+                ", fullCode='" + fullCode + '\'' +
+                '}';
+    }
 }

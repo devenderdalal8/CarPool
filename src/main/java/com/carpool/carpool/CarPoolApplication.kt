@@ -11,7 +11,6 @@ import java.util.concurrent.Executor
 
 @EnableAsync
 @SpringBootApplication(exclude = [SecurityAutoConfiguration::class])
-@EnableWebSocketMessageBroker
 open class CarPoolApplication {
     @Bean
     open fun taskExecutor(): Executor {

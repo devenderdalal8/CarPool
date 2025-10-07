@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Collaborative Editor - Batched</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <style>.CodeMirror{height:400px;border:1px solid #ddd}</style>
+</head>
+<body>
+<h3>Collaborative Editor (Batched)</h3>
+<p>Session: <span id="sid">default</span> — User: <span id="uid"></span></p>
+<textarea id="editor"></textarea>
+
+<script>
+    const sessionId = "default";
+    const userId = "user-" + Math.floor(Math.random()*10000);
+    document.getElementById('uid').innerText = userId;
+    document.getElementById('sid').innerText = sessionId;
+
+    let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {mode:'javascript',lineNumbers:true});
+    let stompClient;
+    let changeBuffer = []; // array of CodeEdit-like objects
+    let lastLocalVersion = 0; // optional
+
+    // connect websocket
+    function connect() {
+      const socket = new SockJS('/ws'); // same origin; served by Spring
+      stompClient = Stomp.over(socket);
+      stompClient.connect({}, frame => {
+        console.log('connected', frame);
+        // subscribe to session topic
+        stompClient.subscribe('/topic/session/' + sessionId, msg => {
+          const batch = JSON.parse(msg.body);
+          if (batch.userId === userId) return; // ignore own echoed batch
+
+          // apply each edit in batch
+          (batch.edits || []).forEach(e => {
+            const from = {line: e.lineNumber, ch: e.startIndex};
+            const to   = {line: e.lineNumber, ch: e.endIndex};
+            editor.replaceRange(e.newText, from, to, 'remote');
+          });
+        });
+
+        // fetch initial doc
+        fetch('/api/code/' + sessionId).then(r=>r.json()).then(doc=> {
+          if (doc && doc.content) editor.setValue(doc.content);
+        }).catch(e=>console.warn('no initial doc', e));
+      });
+    }
+
+    // buffer local edits (small patches)
+    editor.on('change', (cm, changeObj) => {
+      // ignore remote-initiated changes (CodeMirror gives origin param sometimes)
+      if (changeObj.origin === 'remote') return;
+
+      // create CodeEdit object for this change
+      const edit = {
+        sessionId,
+        userId,
+        lineNumber: changeObj.from.line,
+        startIndex: changeObj.from.ch,
+        endIndex: changeObj.to.ch,
+        newText: changeObj.text.join('\n')
+      };
+
+      changeBuffer.push(edit);
+    });
+
+    // periodically send buffered edits as a batch
+    setInterval(() => {
+      if (!stompClient || !stompClient.connected) return;
+      if (changeBuffer.length === 0) return;
+
+      const batch = { sessionId, userId, edits: changeBuffer.splice(0, changeBuffer.length) };
+      stompClient.send('/app/editBatch', {}, JSON.stringify(batch));
+    }, 700); // send every 700 ms (tweakable)
+
+    connect();
+</script>
+</body>
+</html>

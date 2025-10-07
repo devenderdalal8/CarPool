@@ -12,20 +12,20 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     /*
-    * This class configures WebSocket messaging using STOMP protocol.
-    * STOMP endpoints:
-    * Send: /app/message
-    * Subscribe: /topic/messages
-    * Message Broker: /topic
-    * Application Prefix: /app
-    * Endpoint: /ws
-    * Client library: SockJS
-    * */
+     * This class configures WebSocket messaging using STOMP protocol.
+     * STOMP endpoints:
+     * Send: /app/message
+     * Subscribe: /topic/messages
+     * Message Broker: /topic
+     * Application Prefix: /app
+     * Endpoint: /ws
+     * Client library: SockJS
+     * */
     @Override
     public void configureMessageBroker(@NotNull MessageBrokerRegistry config) {
 //       Enables a simple in-memory message broker for destinations prefixed
 //       with '/topic' (used for broadcasting messages to subscribers)
-        config.enableSimpleBroker("/topic" , "/private");
+        config.enableSimpleBroker("/topic", "/private");
         // Enables /user/{username}/queue/... destinations
         config.setUserDestinationPrefix("/user");
         //topic subscribe which is use for publish my topic
@@ -35,7 +35,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-editor") // connection establishment
-                .setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS(); // Enable SockJS fallback options
     }
 }

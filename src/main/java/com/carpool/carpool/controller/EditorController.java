@@ -6,6 +6,7 @@ import com.carpool.carpool.dto.codeMirror.CodeUpdate;
 import com.carpool.carpool.util.SessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -41,5 +42,11 @@ public class EditorController {
         // Save the updated document to the database
         // ✅ Broadcast to all subscribers of this specific sessionId
         simpMessagingTemplate.convertAndSend("/topic/editor/" + edit.getSessionId(), new CodeUpdate(edit.getSessionId(), edit.getUserId(), edit.getLineNumber(), edit.getStartIndex(), edit.getEndIndex(), edit.getNewText()));
+    }
+
+    @MessageMapping("/edit")
+    @SendTo("/topic/editor")
+    public CodeEdit receiveEdit(CodeEdit message) {
+        return message;
     }
 }

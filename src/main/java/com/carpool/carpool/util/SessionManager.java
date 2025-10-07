@@ -60,7 +60,7 @@ public class SessionManager {
     private void persistActiveSessions(){
         // Persists sessions for pro users only
         var proSessions = sessions.values().stream()
-                .filter(CodeDocument::getProUser) // Filters pro user sessions
+                .filter(CodeDocument::isProUser) // Filters pro user sessions
                 .toList();
 
         if(proSessions.isEmpty()){
