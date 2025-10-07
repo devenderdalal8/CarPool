@@ -33,7 +33,8 @@ public class SecurityConfig {
                                 "/api/user/refresh-token",
                                 "/ws/**",
                                 "/ws",
-                                "/home.html"
+                                "/home.html",
+                                "/api/code/**"
                         ).permitAll()   // ✅ allow public endpoints
                         .anyRequest().authenticated() // ✅ secure all others
                 )

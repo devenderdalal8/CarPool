@@ -7,7 +7,8 @@ object Constants {
     const val RESET_PASSWORD = "reset-password"
     const val VERIFICATION_EMAIL_MESSAGE = "Verify email by the link sent on your email address"
     const val USER_LOGGED_MESSAGE = "User logged in successfully"
-
+    const val CHAR_POOL: String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    const val SESSION_ID_LENGTH = 9
 }
 
 

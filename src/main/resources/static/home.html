@@ -30,7 +30,7 @@
 
     // connect websocket
     function connect() {
-      const socket = new SockJS('/ws'); // same origin; served by Spring
+      const socket = new SockJS('http://localhost:1235/ws'); // same origin; served by Spring
       stompClient = Stomp.over(socket);
       stompClient.connect({}, frame => {
         console.log('connected', frame);
