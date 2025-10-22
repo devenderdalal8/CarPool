@@ -1,5 +1,6 @@
 package com.carpool.carpool.config;
 
+import com.carpool.carpool.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,16 +25,18 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/user/**",
-                                "/api/user/login",
-                                "/api/user/signup",
-                                "/api/user/confirm-account",
-                                "/api/user/forgot-password",
-                                "/api/user/reset-password",
-                                "/api/user/refresh-token",
+                                "/api/auth/**",            // login / refresh / logout
+                                "/api/user/register",      // registration endpoint
+                                "/api/public/**",          // any intentionally public API
+                                "/v3/api-docs/**",         // OpenAPI
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/health",
                                 "/ws/**",
                                 "/ws",
+                                "/rateLimit/data",
                                 "/home.html",
+                                "/static/**",
                                 "/api/code/**"
                         ).permitAll()   // ✅ allow public endpoints
                         .anyRequest().authenticated() // ✅ secure all others
