@@ -6,5 +6,6 @@ import lombok.AllArgsConstructor
 data class RefreshTokenRequest(val refreshToken: String = "")
 
 data class RefreshTokenResponse(
-    val accessToken: String = "", val refreshToken: String = ""
+    val accessToken: String = "",
+    val refreshToken: String = ""
 )

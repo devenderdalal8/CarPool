@@ -25,15 +25,13 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**",            // login / refresh / logout
+                                "/api/user/**",            // login / refresh / logout
                                 "/api/user/register",      // registration endpoint
                                 "/api/public/**",          // any intentionally public API
                                 "/v3/api-docs/**",         // OpenAPI
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/health",
-                                "/ws/**",
-                                "/ws",
+                                "/actuator/**",
                                 "/rateLimit/data",
                                 "/home.html",
                                 "/static/**",

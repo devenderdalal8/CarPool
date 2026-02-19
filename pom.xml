@@ -86,10 +86,7 @@
             <artifactId>spring-context-support</artifactId>
             <version>6.1.5</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
@@ -161,6 +158,17 @@
             <version>2.3.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!--Jwt token-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -184,13 +192,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
-        <!-- <dependency>
-             <groupId>org.springframework.boot</groupId>
-             <artifactId>spring-boot-starter-data-mongodb</artifactId>
-             <version>3.2.5</version>
-         </dependency>
- -->
         <!--Rate Limit-->
         <dependency>
             <groupId>com.github.vladimir-bukhtoyarov</groupId>
